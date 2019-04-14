@@ -87,7 +87,7 @@ class Solution {
 		HTTPS和交互原理和现实世界的交互原理与方式一致的，都可以找到类比，同样的道理，其他计算机实现原理大部分都能在现实世界中找到对应的例子，这样更加便于我们理解。
 
 ## Tip
-### JAVA对象传参
+### JAVA对象传参,到底是值传参还是引用传参？
 本次分享的技巧是关于Java对象传参时到底是值传参还是引用传参，之所以有这个问题是以为前段时间在实现统一认证的时候，涉及到对指定账号下的权限数据放入List数据结构时的不确定性引发的思考，为此我做了一个实验，具体代码如下
 
 ```java
@@ -128,3 +128,29 @@ listObject===:zhangsan
 
 总结：在java中，基本类型传参是值传参，对象传参是引用传参。<br>
 参考文章：[关于Java对象作为参数传递是传值还是传引用的问题](https://blog.csdn.net/xiangwanpeng/article/details/52454479)
+
+## Share
+### 基于RBAC原则设计的用户权限管理能力
+RBAC全称是基于角色的访问控制，本次的用户权限控制就参考了RBAC对数据模型进行设计，设计这套模型的目的是希望通过数据模型做到基于用户或者角色灵活的进行权限配置，权限的类型包括菜单权限和按钮权限，这篇短文我将采用总分的模式来介绍。
+#### 用户权限数据模型涉及到的模型
+
+* 用户基本信息表 ： 用来存放用户基本信息，本次表结构的设计将各类用户的共同数据进行抽象，个性化数据统一放到拓展信息表中。
+* 用户拓展信息表 ： 存放各类用户的拓展信息，该表模型采用了纵表的设计模式，方面表的内容可以无限扩展。后期可根据数据量的大小再行决定对用户数据这部分内容进行升级。
+* 角色表 ： 存放用户角色信息，考虑到角色后期可以分为多个级别，因此该表的设计理念采用了行政区划表的设计模型，即对于每条数据增加一个父级属性，这样就可以做到无限级联的数据支撑。
+* 权限表 ： 存放菜单权限或者数据权限与用户和角色的关系数据。起到灵活控制数据的权限数据的目的。
+* 菜单表、按钮表：存放系统菜单数据和按钮数据，这两个实体将通过权限表与角色和用户产生关联。
+
+#### 数据表结构
+```sql
+
+----用户基本信息表/*==============================================================*//* Table: USER_INFO                                          *//*==============================================================*/create table USER_INFO(   USER_ID              varchar(25) not null comment '用户ID',   ORGANIZATION_ID      varchar(25) comment '组织ID',   USER_CODE            varchar(25) comment '用户code',   USER_NAME            varchar(50) comment '用户名',   USER_ALIAS_NAME      varchar(50) comment '别名',   USER_TYPE_ENUM       varchar(8) comment '用户类型',   USER_PASSWORD        varchar(255) comment '用户密码',   USER_TEL             varchar(30) comment '用户电话',   USER_EMAIL           varchar(50) comment '用户邮箱',   USER_CLOSE_TIME      datetime comment '用户关闭时间',   LOGIN_TIME           datetime comment '当前登陆时间',   LAST_LOGIN_TIME      datetime comment '上一次登陆时间',   LOGIN_TIMES          int comment '登陆次数',   AUTHENTICATE_STATUS_ENUM varchar(8) comment '认证状态',   USER_STATUS_ENUM     varchar(8) comment '用户状态',   CREATE_TIME          datetime comment '创建时间',   UPDATE_TIME          datetime comment '更新时间',   primary key (USER_ID));alter table USER_INFO comment '用户基本信息表';
+
+----用户拓展信息表
+/*==============================================================*//* Table: USER_ADDITIONAL_INFO                               *//*==============================================================*/create table USER_ADDITIONAL_INFO(   ADDITIONAL_ID        varchar(25) not null comment '附加信息ID',   USER_ID              varchar(25) comment '用户ID',   ADDITIONAL_CATEGORY  varchar(50) comment '附加分类',   ADDITIONAL_CATEGORY_NAME varchar(50) comment '附加分类名',   CATEGORY_ITEM        varchar(50) comment '附加分类项',   CATEGORY_ITEM_NAME   varchar(50) comment '附加分类项名',   ITEM_NAME            varchar(50) comment '分类项项目名',   ITEM_VALUE           varchar(255) comment '分类项项目值',   ITEM_SORT            int comment '分类项项目排序',   primary key (ADDITIONAL_ID));alter table USER_ADDITIONAL_INFO comment '用户拓展信息表';
+
+----角色表/*==============================================================*//* Table: ROLE_INFO                                          *//*==============================================================*/create table ROLE_INFO(   ROLE_ID              varchar(25) not null comment '角色ID',   PARENT_ROLE_ID       varchar(25) comment '父角色ID',   ROLE_NAME            varchar(50) comment '角色名称',   ROLE_DESC            varchar(255) comment '角色描述',   IS_DEFAULT_ENUM      varchar(8) comment '是否默认',   ROLE_STATUS_ENUM     varchar(8) comment '角色状态',   CREATE_USER          varchar(25) comment '创建人',   CREATE_TIME          datetime comment '创建时间',   UPDATE_USER          varchar(25) comment '更新人',   UPDATE_TIME          datetime comment '更新时间',   CORP_CODE            varchar(50) comment '租户代码',   CORP_NAME            varchar(50) comment '租户名称',   REMARK               varchar(255),   primary key (ROLE_ID));alter table ROLE_INFO comment '角色表';
+
+----权限表/*==============================================================*//* Table: PERMISSION_INFO                                    *//*==============================================================*/create table PERMISSION_INFO(   PERMISSION_ID        varchar(25) not null comment '权限ID',   PARENT_PERMISSION_ID varchar(25) comment '父权限ID',   PERMISSION_NAME      varchar(50) comment '权限名称',   PERMISSION_DESC      varchar(255) comment '权限描述',   PERMISSION_MASTER    varchar(50) comment '权限属主:如用户权限或者角色权限',   PERMISSION_MASTER_ID varchar(25) comment '权限属主值:如，用户ID或者角色ID',   PERMISSION_ACCESS    varchar(50) comment '权限操纵类型，如：button或者menu',   PERMISSION_ACCESS_ID varchar(25) comment '权限操作类型ID，如，buttonID或者MenuID',   PERMISSION_STATUS_ENUM varchar(8) comment '权限状态',   CORP_CODE            varchar(50) comment '租户代码',   CORP_NAME            varchar(50) comment '租户名称',   REMARK               varchar(255),   primary key (PERMISSION_ID));alter table PERMISSION_INFO comment '权限表';
+----菜单表/*==============================================================*//* Table: SYS_MENU_DICT                                      *//*==============================================================*/create table SYS_MENU_DICT(   MENU_ID              varchar(25) not null comment '菜单ID',   MENU_CODE            varchar(50) comment '菜单编码',   MENU_NAME            varchar(50) comment '菜单名称',   MENU_TAG             varchar(255) comment '菜单唯一标识，对应shiro中的标识，用作权限控制',   MENU_TYPE_ENUM       varchar(8) comment '菜单类型',   PARENT_MENU_ID       varchar(25) comment '父菜单ID',   MENU_URL             varchar(255) comment '菜单路径',   MENU_SORT            varchar(4) comment '菜单排序',   IS_DELETE_ENUM       varchar(8) comment '是否删除',   IS_ROOT              varchar(8) comment '是否根节点',   IS_LEAF              varchar(8) comment '是否叶子节点',   MENU_DEPTH           numeric comment '目录深度',   CREATE_USER          varchar(25) comment '创建用户',   CREATE_TIME          datetime comment '创建时间',   UPDATE_USER          varchar(25) comment '更新用户',   UPDATE_TIME          datetime comment '更新时间',   DELETE_USER          varchar(25) comment '删除用户',   DELETE_TIME          datetime comment '删除时间',   CORP_CODE            varchar(50) comment '租户编码',   CORP_NAME            varchar(50) comment '租户名称',   MENU_STATUS_ENUM     varchar(25) comment '菜单状态',   REMARK               varchar(255) comment '备注',   primary key (MENU_ID));alter table SYS_MENU_DICT comment '菜单表';
+```
+#### 
