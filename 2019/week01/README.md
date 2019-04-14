@@ -86,3 +86,45 @@ class Solution {
 	总结
 		HTTPS和交互原理和现实世界的交互原理与方式一致的，都可以找到类比，同样的道理，其他计算机实现原理大部分都能在现实世界中找到对应的例子，这样更加便于我们理解。
 
+## Tip
+### JAVA对象传参
+本次分享的技巧是关于Java对象传参时到底是值传参还是引用传参，之所以有这个问题是以为前段时间在实现统一认证的时候，涉及到对指定账号下的权限数据放入List数据结构时的不确定性引发的思考，为此我做了一个实验，具体代码如下
+
+```java
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+	
+public class testListObject {
+    public static void main(String[] args) {
+        new testListObject().testListObject();
+    }
+	
+    public void testListObject() {
+        List<Map> listObject = new ArrayList<Map>(2);
+        this.setListObject(listObject);
+        System.out.printf("listObject===:"+listObject.get(0).get("name"));
+    }
+	
+    public void setListObject(List<Map> listObject){
+	
+        Map mapObject = new HashMap();
+        mapObject.put("name","zhangsan");
+        mapObject.put("sex","male");
+        listObject.add(0,mapObject);
+        listObject.add(1,mapObject);
+        System.out.println("setListObject+listObject===:"+listObject.get(0).get("name"));
+    }
+}
+
+输出结果：
+setListObject+listObject===:zhangsan
+listObject===:zhangsan
+
+```
+不难看出来，当我new了一个空的list对象，在执行了一次数据初始化后，两次打印的结果是一致的，这说明在java中对象传参是引用传参。
+可是这样就完事了吗？我刚才用的对象，还有一种对象没有试验，那就是基本数据类型，为此我从网上查了一遍文章，文章的给出的例子很明确的表明了，对于基本数据类型的传参，java采用的是值传参，
+
+总结：在java中，基本类型传参是值传参，对象传参是引用传参。<br>
+参考文章：[关于Java对象作为参数传递是传值还是传引用的问题](https://blog.csdn.net/xiangwanpeng/article/details/52454479)
