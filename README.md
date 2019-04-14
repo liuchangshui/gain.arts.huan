@@ -19,4 +19,4 @@
 >1、用markdown通过github来分享每周的计划内容。
 
 ## 记录
-* [ATRS WEEK01 (0408-0414)](https://github.com/liuchangshui/gain.arts.huan/tree/master/2019/week01)<br>
+* [ARTS WEEK01 (0408-0414)](https://github.com/liuchangshui/gain.arts.huan/tree/master/2019/week01)<br>

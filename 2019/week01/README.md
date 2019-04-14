@@ -1,4 +1,4 @@
-# ATRS WEEK01 (0408-0414)
+# ARTS WEEK01 (0408-0414)
 ## Algorithm 
 ### 题目
 ```
