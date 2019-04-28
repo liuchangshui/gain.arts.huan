@@ -1,4 +1,4 @@
-# ARTS WEEK01 (0415-0421)
+# ARTS WEEK02 (0415-0421)
 ## Algorithm 
 ### 题目
 ```
