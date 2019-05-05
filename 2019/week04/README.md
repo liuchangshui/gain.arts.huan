@@ -2,14 +2,65 @@
 ## Algorithm 
 ### 题目
 ```
-XXX
+9. Palindrome Number
+
+Determine whether an integer is a palindrome. An integer is a palindrome when it reads the same backward as forward.
+
+Example 1:
+
+	Input: 121
+	Output: true
+	Example 2:
+
+	Input: -121
+	Output: false
+	Explanation: From left to right, it reads -121. From right to left, it becomes 121-. Therefore it is not a palindrome.
+Example 3:
+
+	Input: 10
+	Output: false
+	Explanation: Reads 01 from right to left. Therefore it is not a palindrome.
+Follow up:
+
+Coud you solve it without converting the integer to a string?
 	
 ```
 
 ### 解法 1
 ```java
+class Solution {
+public:
+    bool isPalindrome(int x) {
+        //对于负数直接判定为不符合。
+        if(x < 0){
+            return false;
+        }
+        
+        //对于小于10直接判定为符合
+        if(x < 10){
+            return true;
+        }
+        int x_temp = x;
+        int resultNum = 0;
+        //对输入的数字进行倒序排列，生成新的数字
+        while(x_temp > 0){
+            int lastNum = x_temp % 10;//获取当前数字中的最后一位数
+            x_temp = x_temp / 10;//将当前数字去掉最后一位数字
+            if(resultNum < 2147483647/10){
+                resultNum = resultNum * 10 + lastNum;
+            }else{
+                resultNum = 0;
+            }
+        }
 
+        //比较输入和输出的数字大小，若相等，则表示这两个数字是相等的
+        if(x == resultNum){
+            return true;
+        }        
+        return false;
 
+    }
+};
 
 ```
 
@@ -163,4 +214,5 @@ XXX
 参考文献：[1][猴子都能懂的git入门--高级篇](https://backlog.com/git-tutorial/cn/stepup/stepup2_8.html)
 
 ## Share
-### XXX
+### 分享数据库的设计思路
+![数据库设计思路@需求分析与逻辑设计](https://github.com/liuchangshui/gain.arts.huan/blob/master/Resources/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%40%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E9%80%BB%E8%BE%91%E8%AE%BE%E8%AE%A1.png)
