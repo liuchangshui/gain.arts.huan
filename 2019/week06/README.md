@@ -1,54 +1,44 @@
-# ARTS WEEK05 (0506-0512)
+# ARTS WEEK06 (0513-0519)
 ## Algorithm 
 ### 题目
 ```
-70. Climbing Stairs
+343. Integer Break
 
-You are climbing a stair case. It takes n steps to reach to the top.
-
-Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
-
-Note: Given n will be a positive integer.
+Given a positive integer n, break it into the sum of at least two positive integers and maximize the product of those integers. Return the maximum product you can get.
 
 Example 1:
 
 	Input: 2
-	Output: 2
-	Explanation: There are two ways to climb to the top.
-	1. 1 step + 1 step
-	2. 2 steps
+	Output: 1
+	Explanation: 2 = 1 + 1, 1 × 1 = 1.
+	Example 2:
 
-Example 2:
+	Input: 10
+	Output: 36
+	Explanation: 10 = 3 + 3 + 4, 3 × 3 × 4 = 36.
 
-	Input: 3
-	Output: 3
-	Explanation: There are three ways to climb to the top.
-	1. 1 step + 1 step + 1 step
-	2. 1 step + 2 steps
-	3. 2 steps + 1 step
-	
+Note: You may assume that n is not less than 2 and not larger than 58.	
 ```
 
 ### 解法 1
 
-强制递归求解，因为重复计算太多的原因，会导致时间和空间复杂度过高，时间复杂度达到n的平方，所以这个算法其实是不被leetcode收录的。
-算法图解如图所示，被框选中的地方是需要重复计算的地方，会发现有大量的重复计算内容：<br>
-![递归算法图解](https://github.com/liuchangshui/gain.arts.huan/blob/master/Resources/%E9%80%92%E5%BD%92%E7%AE%97%E6%B3%95%E5%9B%BE%E7%A4%BA.png)
-
 ```java
+import java.lang.Math;
+
 class Solution {
-    public int climbStairs(int n) {
-        return climbEveryStairs(n);
-    }
-    
-    
-    private int climbEveryStairs(int n){        
-        //set value is 1 when var[0] or var[1]
-        if(n == 0 || n == 1){
+    public int integerBreak(int n) {
+        if(n<=1){
             return 1;
         }
-
-        return climbEveryStairs(n-1) + climbEveryStairs(n-2);
+        int res = 0;
+        for(int i=1; i<n; i++){
+            res = max3(res,i*(n-i),i*integerBreak(n-i));
+        }
+        return res;
+    }
+    
+    public int max3(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
     }
 }
 
@@ -56,31 +46,35 @@ class Solution {
 
 ### 解法 2
 
-记忆搜索方法，这个算法是针对强制递归所做的优化，将重复计算部分的内容做了类似寄存器这样一个设置，临时对数值做保存，从而降低重复计算的内容，时间复杂度在可接受范围O(n)。
-
 ```java
+import java.lang.Math;
+
 class Solution {
-    public int climbStairs(int n) {
-        //using memory search approch to slove this problem
-        //set var array that store processing data
-        int[] climbArray = new int[n+1];
-        return climbEveryStairs(n,climbArray);
+    public int integerBreak(int n) {
+        int[] memo = new int[n+1];
+        return maxIntegerBreak(n,memo);
     }
     
-    private int climbEveryStairs(int n, int[] climbArray){
-         //using looping statment to add every result
+    public int max3(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
+    }
+    
+    public int maxIntegerBreak(int n,int[] memo){
+        if(n<=1){
+            return 1;
+        }
         
-            //set value is 1 when var[0] or var[1]
-            if(n==0 || n==1){
-                return 1;
-            }
-            System.out.println(n+"===="+climbArray[n]);
-            //set value is var[n] = var[n-1] + var[n-2] when var[n] is not -1
-            if(climbArray[n] == 0){
-                System.out.println(n+"===="+n+"-"+1+"+"+n+"-"+2);
-                climbArray[n] = climbEveryStairs(n-1,climbArray) + climbEveryStairs(n-2,climbArray);
-            }
-        return climbArray[n];
+        if(memo[n] != 0){
+            return memo[n];
+        }
+        
+        int res = 0;
+        
+        for(int i=1; i<n; i++){
+            res = max3( res,i*(n-i),i*maxIntegerBreak((n-i),memo) );
+            memo[n] = res;
+        }
+        return res;
     }
 }
 ```
@@ -88,36 +82,36 @@ class Solution {
 
 ### 解法 3
 
-动态规划算法，这个算法本质上也是递归，但是在这个题目中，递归的方式有别于我们传统意义上理解的递归，采用的是自下向上的递归方案，定义一个数组，根据题目将边界数值放入数组中，即array[0]=1以及array[1]=1，然后在此基础之上，设置一个循环，i=2，将2-->n范围内的数值采用 
 
 ```java
-array[n] = array[n-1] + array[n-2];
-```
-来表现。这样就不是函数的直接调用，采用数组就可以来实现，而且可以进一步优化，不用数组，采用变量替换的方式，将空间复杂度降低到O(1)的水平
+import java.lang.Math;
 
-```java
 class Solution {
-    public int climbStairs(int n) {
-        return climbEveryStairs(n);
+    public int integerBreak(int n) {
+        int[] memo = new int[n+1];
+        memo[1] = 1;
+        return maxIntegerBreak(n,memo);
     }
     
+    public int max3(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
+    }
     
-    private int climbEveryStairs(int n){        
-        int[] climbStairsArray = new int[n+1];
-        climbStairsArray[0] = 1;
-        climbStairsArray[1] = 1;
+    public int maxIntegerBreak(int n,int[] memo){
         
-        for(int i=2; i <= n; i++){
-            climbStairsArray[i] = climbStairsArray[i-1] + climbStairsArray[i-2];
+        for(int i=1; i<=n; i++){
+            
+            for(int j=1; j<i; j++){
+                memo[i] = max3( memo[i],j*(i-j),j*memo[i-j] );
+            }
         }
-        
-        return climbStairsArray[n];
+        return memo[n];
     }
 }
 ```
 参考文献：<br>
 [1][leetcode题解(动态规划)](https://juejin.im/post/5b3b562e5188251a9f247cd5#heading-8)<br>
-[2][climbing-stairs/solution](https://leetcode.com/problems/climbing-stairs/solution/)
+
 
 ## Review
 ### [The Greatest Developer Fallacy Or The Wisest Words You’ll Ever Hear?](https://skorks.com/2011/02/the-greatest-developer-fallacy-or-the-wisest-words-youll-ever-hear/)
@@ -151,6 +145,9 @@ I’ve gone completely off-track. “Investing in professional future” is just
 You Don’t Know What You Don’t Know
 We’ve all had those moments where you’re going through major pain trying to solve a problem until someone comes along and tells you about algorithm X or technology Y and it makes everything fast and simple. It was lucky that person just happened to be there to show you the “easy” way, otherwise you would have spent days/weeks trying to figure it out and it would have been a mess. You can’t be blamed for this though, you don’t know what you don’t know. For me, this is where the “I will learn it when I need it” mentality falls over. You can’t learn something if you don’t know it exists. Google goes a long way towards mitigating this problem, but not all the way. There are plenty of problems you will encounter in the wild where you can beat your head against the wall ad infinitum unless you know what class of problem you’re looking at (_e.g. if you know a bit about searching and constraint propagation, solving sudoku is easy, otherwise it’s really quite hard_). You can’t learn about an algorithm if you’re not aware of it or its applicability. You can’t utilise a technology to solve a problem if you don’t even realise it has that capability. You’re not going to always have someone there to point you in the right direction. I am willing to bet there is a billion lines of code out there right now which can be replaced with a million lines of faster, cleaner, better code simply because whoever wrote it didn’t know what they didn’t know.
 
+你不知道你所不知道的<br>
+很多时候，当我们为解决某个问题而陷入长时间的痛苦时，某人如天使一样告诉我们某种算法或者技术后，问题就迎刃而解了，仿佛每件事都变的容易和简单。通常来说这种情况是幸运的，没有让我们花费巨量的时间和精力去寻找解决方案。如果没有发生这种情况，你也不会被责怪，因为你根本就不知道你所不了解的内容。对于我来说，我就掉进了“我需要的时候再去学习”。可是如果你连知道都不知道这些知识点存在，根本就无从谈起学习二字，谷歌等搜索引擎，会对这种情况有所缓解，但是不能彻底解决。在生活的世界中有大量的问题需要解决，每天冲击着我们的大脑，除非你知道某种问题的归类，再去寻找解决方案（比如，如果你知道一点关于搜索和限制繁殖，那么解决数独问题就很容易，否者将会很难）。如果你没有觉察或有适用的场景就没有办法学习相关的算法。如果你压根就不知道某门技术的存在，那么怎么能想到用这种技术去解决对应的问题呢？现实世界中，不会一直有人在旁边适时的告诉你应该这么做或者采用什么技术。我相信会存在百万行代码可以替换十亿行代码的功能，而且更快、更整洁也更简单，因为无论是谁写的，都存在他不知道的领域。
+
 I seem to be making a case for the opposite side here, if knowing what you don’t know is the ticket then surely we should be focusing on breadth of knowledge. Superficial awareness of as much stuff as possible should see us through, we’ll be able to recognise the problems when we see them and then learn what we need more deeply. Except it doesn’t work like that, skimming subjects doesn’t allow you to retain anything, our brain doesn’t work that way. If we don’t reinforce and dig deeper into the concepts we quickly page that information out as unimportant, it is a waste of time (think back to cramming for exams, how much do you remember the next day?). However if you focus on building deeper understanding of a subject – in an interesting twist – you will gain broad knowledge as well (which you will actually be able to retain). My grandad is a nuclear physicist, several decades of working to gain deeper knowledge of the subject has made him an expert, but it has also made him an excellent mathematician, a decent chemist, a pretty good geologist, a fair biologist etc. Just some empirical evidence that seeking depth leads to breadth as a side-effect.
 
 Can You Learn It Fast Enough
@@ -170,19 +167,34 @@ Image by SamueleGhilardi and SpecialKRB
 
 	
 ## Tip
-### 针对电商领域，未店铺设置规则的可扩展表的设计
+### 本周不分享表结构设计了，分享一些对于管理的看法
 
-表结构如下图所示，因为涉及到一些商业机密，我通常会将表的字段与名字进行修改，但主体结构不会变化的，这个表所要承载的信息是能够保障针对店铺设置的规则可以在这个表中进行存储，可以看到，里面包括了rule_name和rule_code这两个字段，这两个字段的意义在于可以通过名称和编码让规则做定位。
-剩下的是company和shop,可以定位为那个店铺设置的规则，再往下是重要的字段也是核心的字段，rule_input_key rule_input_value rule_output_key rule_output_value这四个字段扮演的角色是可以支持各种类型的规则信息，比如佣金规则，可以针对输出字段进行设置。如打折规则可以利用输入和输出字段进行联合设置。
-这样的表结构让表的可扩展性增强了，同时也不会有过多的额数据冗余。
-
-```sql/*==============================================================*//* Table: COMPANY_SHOP_RULE_DICT                             *//*==============================================================*/create table COMPANY_SHOP_RULE_DICT(   SHOP_RULE_ID         varchar(25) not null comment '店铺规则ID',   SHOP_RULE_NAME       varchar(50) not null comment '店铺规则名称：如佣金设置、连续入住规则',   SHOP_RULE_CODE       varchar(50) not null comment '店铺规则编码：匹配规则名称的英文简称',   COMPANY_ID           varchar(25) comment '公司ID',   SHOP_ID              varchar(25) comment '店铺ID',   SHOP_RULE_INPUT_KEY  varchar(20) not null comment '店铺规则输入key：标记为什么类型的规则，无输入的时候默认设置为defaultkey',   SHOP_RULE_INPUT_VALUE varchar(20) not null comment '店铺规则输入值：对应输入key，标记为规则值,无输入的时候，默认输入为defaultvalue',   SHOP_RULE_OUTPUT_KEY varchar(20) not null comment '店铺规则输出key：标记为什么类型的规则',   SHOP_RULE_OUTPUT_VALUE varchar(20) not null comment '店铺规则输出值：对应输出key，标记为规则结果值',   SHOP_RULE_STATUS_ENUM char(8) not null comment '店铺规则状态枚举：如，是否启用',   CREATE_USER          varchar(25) not null comment '创建人',   CREATE_TIME          datetime not null comment '创建时间',   UPDATE_USER          varchar(25) comment '更新人',   UPDATE_TIME          datetime comment '更新时间',   REMARK               varchar(255) comment '备注',   primary key (SHOP_RULE_ID));alter table COMPANY_SHOP_RULE_DICT comment '店铺规则表';
-
-```
-
+	1、管理者是以团队来解决问题，而非个人来解决问题；
+	
+	2、管理者要修炼出：识人、目标管理、激励管理、培养机制等核心能力；
+	
+	3、管理者要学会发挥身边的资源，调度资源；
+	
+	4、管理者要能传情达意；
+	
+	5、作为个人来讲，发挥所长往往比补充其短所造的成就来的大（这句话很重要）；
+	
+	6、要识别自身所长与所短，要识别团队成员的所长所短；
+	
+	7、个人优势突破联系：自拍 、 自我表扬 、 美好场景回想 、 美好感觉回想 、 放大美好感觉；
+	
+	8、如果把一个人比喻成手机，情绪是操作系统，能力是应用；
+	
+	9、沟通的情绪控制可以遵循三明治原则；
+	
+	10、情商就是控制好自己的情绪，照顾别人的情绪；
+	
+	11、领导是有层级划分的，以结果说话、育人、做人，逐级上升；
+	
+	12、无情的制度、绝情的管理、有情的领导；
 
 ## Share
-### 编码技术成功的关键要点
+### 编码技术成功的关键要点（本周继续分享这个内容）
 这次分享的是英文，我将对这篇英文进行翻译，并分享给大家。
 [The Key To Accelerating Your Coding Skills](http://blog.thefirehoseproject.com/posts/learn-to-code-and-be-self-reliant/)
 
